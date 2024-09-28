@@ -16,7 +16,7 @@ export default function handler(req) {
       (
         <div
           style={{
-            display: 'flex', // Add display: flex to handle multiple child nodes properly
+            display: 'flex',
             flexDirection: 'row',
             backgroundColor: '#1E1E1E',
             color: '#FFFFFF',
@@ -25,11 +25,15 @@ export default function handler(req) {
             padding: '20px',
           }}
         >
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>{title || message || 'Anime Game'}</h1>
             <p style={{ fontSize: '24px' }}>{synopsis || 'Guess the anime title from the description'}</p>
           </div>
-          {image && <img src={image} alt="Anime" style={{ width: '200px', height: '300px' }} />}
+          {image && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '300px' }}>
+              <img src={image} alt="Anime" style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} />
+            </div>
+          )}
         </div>
       ),
       {
@@ -38,10 +42,11 @@ export default function handler(req) {
       }
     );
   } catch (error) {
+    console.error('Error generating image:', error);
     return new ImageResponse(
       (
-        <div style={{ backgroundColor: '#FF0000', width: '100%', height: '100%' }}>
-          <h1>Error</h1>
+        <div style={{ display: 'flex', backgroundColor: '#FF0000', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <h1>Error Generating Image</h1>
         </div>
       ),
       {
