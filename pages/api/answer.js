@@ -1,11 +1,11 @@
-import { fetchAnimeData } from '../../utils/animeService';
+import { fetchAnimeData } from './animeService'; // Correct path
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).send('Method Not Allowed');
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app'; 
   const { untrustedData } = req.body;
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     let html;
     if (buttonIndex) {
-      // This is the answer to a question
+      // Answer to a question
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === 1;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // This is the "Next Anime" button, so we should show a new anime
+      // "Next Anime" button
       const { title, synopsis, image } = await fetchAnimeData();
       
       console.log('Fetched new anime:', { title, synopsis });
