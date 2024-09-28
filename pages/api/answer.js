@@ -16,12 +16,12 @@ export default async function handler(req, res) {
   try {
     let html;
     if (buttonIndex !== undefined) {
-      // The player answered a question
+      // Compare buttonIndex to see if the answer was correct (button 1 is the correct answer)
       const newTotalAnswered = totalAnswered + 1;
-      const isCorrect = buttonIndex === 1;
+      const isCorrect = buttonIndex === 0; // Ensure 0 is assigned to the correct answer
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const message = isCorrect 
-        ? `Correct! The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered}.`
+        ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
         : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered}.`;
 
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // This is for "Next Question" button - fetch new anime
+      // This is the "Next Question" button, show a new anime
       const { title, synopsis, image } = await fetchAnimeData();
       
       console.log('Fetched new anime:', { title, synopsis });
