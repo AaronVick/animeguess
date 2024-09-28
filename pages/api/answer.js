@@ -1,4 +1,4 @@
-import { fetchAnimeData } from '../../pages/api/animeService';
+import { fetchAnimeData, fetchRandomAnimeTitles } from './animeService';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,20 +9,20 @@ export default async function handler(req, res) {
   const { untrustedData } = req.body;
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
-  const { correctTitle, totalAnswered = 0, correctCount = 0 } = state;
+  const { correctTitle, correctIndex, totalAnswered = 0, correctCount = 0 } = state;
 
   console.log('Received data:', { buttonIndex, state });
 
   try {
     let html;
     if (buttonIndex !== undefined) {
-      // Compare buttonIndex to see if the answer was correct (button 1 is the correct answer)
+      // Compare buttonIndex to see if the answer was correct
       const newTotalAnswered = totalAnswered + 1;
-      const isCorrect = buttonIndex === 0; // Ensure 0 is assigned to the correct answer
+      const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const message = isCorrect 
         ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
-        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered}.`;
+        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
     <meta property="fc:frame:button:2:target" content="${shareUrl}" />
-    <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
+    <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
     <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount }))}" />
   </head>
   <body></body>
@@ -45,8 +45,12 @@ export default async function handler(req, res) {
     } else {
       // This is the "Next Question" button, show a new anime
       const { title, synopsis, image } = await fetchAnimeData();
+      const [wrongAnswer] = await fetchRandomAnimeTitles(1);
       
-      console.log('Fetched new anime:', { title, synopsis });
+      const answers = [title, wrongAnswer].sort(() => 0.5 - Math.random());
+      const correctIndex = answers.indexOf(title);
+
+      console.log('Fetched new anime:', { title, synopsis, answers, correctIndex });
 
       html = `
 <!DOCTYPE html>
@@ -54,10 +58,10 @@ export default async function handler(req, res) {
   <head>
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${baseUrl}/api/og?synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
-    <meta property="fc:frame:button:1" content="${title}" />
-    <meta property="fc:frame:button:2" content="Not ${title}" />
+    <meta property="fc:frame:button:1" content="${answers[0]}" />
+    <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
-    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, totalAnswered, correctCount }))}" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, correctIndex, totalAnswered, correctCount }))}" />
   </head>
   <body></body>
 </html>`;
