@@ -1,16 +1,18 @@
 import axios from 'axios';
 
-// Function to fetch random anime data from Jikan API
 export async function fetchAnimeData() {
-  const randomAnimeId = Math.floor(Math.random() * 1000) + 1; // Random ID for anime
-  const response = await axios.get(`https://api.jikan.moe/v4/anime/${randomAnimeId}`);
+  try {
+    const animeId = Math.floor(Math.random() * 10000); // Randomly selects an anime
+    const animeResponse = await axios.get(`https://api.jikan.moe/v4/anime/${animeId}`);
+    const animeData = animeResponse.data.data;
 
-  if (response.data && response.data.data) {
-    const anime = response.data.data;
-    const title = anime.title;
-    const imageUrl = anime.images.jpg.image_url;
-    return { title, imageUrl };
-  } else {
-    throw new Error('Failed to fetch anime data.');
+    return {
+      title: animeData.title,
+      synopsis: animeData.synopsis,
+      image: animeData.images.jpg.image_url,
+    };
+  } catch (error) {
+    console.error("Error fetching anime data:", error);
+    throw new Error('Unable to fetch anime data at this time.');
   }
 }

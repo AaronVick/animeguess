@@ -1,17 +1,17 @@
 import Head from 'next/head';
 
 export default function Home() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-vercel-url.vercel.app';  // Placeholder for when you set up the environment variable
-  const shareText = encodeURIComponent(`Check out this awesome Anime Guessing Game!\n\nFrame by @yourname.eth`);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-vercel-url.com';
+  const shareText = encodeURIComponent(`Check out this awesome Anime Guessing Game!\n\nFrame by @your_username.eth`);
   const shareLink = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
   return (
     <div>
       <Head>
         <title>Anime Guessing Game</title>
-        <meta name="description" content="A fun game to guess characters from anime" />
+        <meta name="description" content="A fun game to guess anime titles from images and descriptions" />
         <meta property="og:title" content="Anime Guessing Game" />
-        <meta property="og:description" content="Test your knowledge of anime characters" />
+        <meta property="og:description" content="Test your knowledge of anime titles and characters" />
         <meta property="og:image" content={`${baseUrl}/animeGame.png`} />
         <meta property="fc:frame" content="vNext" />
         <meta property="fc:frame:image" content={`${baseUrl}/animeGame.png`} />
