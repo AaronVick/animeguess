@@ -4,12 +4,12 @@ export default async function handler(req, res) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app';
     
-    // Fetch the character data
+    // Fetch the character data from the anime API
     const { characterName, description, image } = await fetchCharacterData();
 
     console.log('Fetched character data:', { characterName, description, image });
 
-    // Create the game response with the question
+    // Create the game response with the question and correct/wrong buttons
     const html = `
       <html>
         <head>
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       </html>
     `;
 
-    // Send the HTML response
+    // Send the HTML response to the game
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
