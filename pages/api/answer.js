@@ -1,4 +1,4 @@
-import { fetchAnimeData } from '../../utils/animeService';
+import { fetchAnimeData } from '../../pages/api/animeService';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -43,14 +43,17 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // Show a new anime
+      // This is the "Next Anime" button, so we should show a new anime
       const { title, synopsis, image } = await fetchAnimeData();
+      
+      console.log('Fetched new anime:', { title, synopsis });
+
       html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta property="fc:frame" content="vNext" />
-    <meta property="fc:frame:image" content="${baseUrl}/api/og?title=${encodeURIComponent(title)}&synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
+    <meta property="fc:frame:image" content="${baseUrl}/api/og?synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
     <meta property="fc:frame:button:1" content="${title}" />
     <meta property="fc:frame:button:2" content="Not ${title}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
@@ -60,6 +63,7 @@ export default async function handler(req, res) {
 </html>`;
     }
 
+    console.log('Sending game HTML response:', html);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
@@ -77,6 +81,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
 
+    console.log('Sending error HTML response:', errorHtml);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(errorHtml);
   }
