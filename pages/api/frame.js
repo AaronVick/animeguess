@@ -1,4 +1,4 @@
-import { fetchAnimeData } from './animeService';
+import { fetchCharacterData } from './animeService';
 
 export default async function handler(req, res) {
   const { untrustedData } = req.body;
@@ -10,15 +10,16 @@ export default async function handler(req, res) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-vercel-url.com';
 
     if (!state.stage || state.stage === 'initial') {
-      const { title, synopsis, image } = await fetchAnimeData();
+      // Fetch the character data
+      const { characterName, description, image } = await fetchCharacterData();
 
       html = `
         <html>
           <head>
             <meta property="fc:frame" content="vNext" />
-            <meta property="fc:frame:image" content="${baseUrl}/api/og?title=${encodeURIComponent(title)}&synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image)}" />
-            <meta property="fc:frame:button:1" content="${title}" />
-            <meta property="fc:frame:button:2" content="Not ${title}" />
+            <meta property="fc:frame:image" content="${baseUrl}/api/og?characterName=${encodeURIComponent(characterName)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(image)}" />
+            <meta property="fc:frame:button:1" content="${characterName}" />
+            <meta property="fc:frame:button:2" content="Not ${characterName}" />
             <meta property="fc:frame:post_url" content="${baseUrl}/api/frame" />
           </head>
         </html>
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
           <head>
             <meta property="fc:frame" content="vNext" />
             <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
-            <meta property="fc:frame:button:1" content="Next" />
+            <meta property="fc:frame:button:1" content="Next Question" />
           </head>
         </html>
       `;
