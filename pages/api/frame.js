@@ -1,37 +1,44 @@
-import { fetchAnime } from '../../utils/animeService';
+import { fetchAnimeData } from './animeService';
 
 export default async function handler(req, res) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://guess-the-artist.vercel.app';
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
   const { untrustedData } = req.body;
+  const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
   const buttonIndex = untrustedData?.buttonIndex;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://your-vercel-url.vercel.app';
 
   try {
     let html = '';
-    const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
+    if (state.stage === 'question') {
+      const correctTitle = state.correctTitle;
+      const selectedTitle = buttonIndex === 1 ? correctTitle : 'Another Anime Title';
+      const isCorrect = selectedTitle === correctTitle;
 
-    if (!state.stage || state.stage === 'initial') {
-      const { correctAnime, description, imageUrl, wrongAnime } = await fetchAnime();
+      const totalAnswered = (state.totalAnswered || 0) + (isCorrect ? 1 : 0);
+      const message = isCorrect ? `Correct!` : `Wrong! The correct answer was ${correctTitle}`;
 
       html = `
         <html>
           <head>
             <meta property="fc:frame" content="vNext" />
-            <meta property="fc:frame:image" content="${baseUrl}/api/og?description=${encodeURIComponent(description)}&image=${encodeURIComponent(imageUrl)}" />
-            <meta property="fc:frame:button:1" content="${correctAnime}" />
-            <meta property="fc:frame:button:2" content="${wrongAnime}" />
+            <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
+            <meta property="fc:frame:button:1" content="Next Anime" />
+            <meta property="fc:frame:button:2" content="Share" />
+            <meta property="fc:frame:button:2:action" content="link" />
+            <meta property="fc:frame:button:2:target" content="https://warpcast.com/~/compose?text=I guessed ${totalAnswered} anime correctly!" />
             <meta property="fc:frame:post_url" content="${baseUrl}/api/frame" />
-            <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctAnime, wrongAnime, totalAnswered: 0, stage: 'question' }))}" />
+            <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered, stage: 'next' }))}" />
           </head>
         </html>
       `;
-    } else {
-      // Logic for processing the user's answer
     }
-
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
-    console.error('Error in frame handler:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error handling frame:', error);
+    res.status(500).json({ error: 'Error generating frame.' });
   }
 }

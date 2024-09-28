@@ -7,8 +7,8 @@ export const config = {
 export default function handler(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const description = searchParams.get('description');
-    const image = searchParams.get('image');
+    const imageUrl = searchParams.get('imageUrl');
+    const message = searchParams.get('message');
 
     return new ImageResponse(
       (
@@ -17,19 +17,20 @@ export default function handler(req) {
             width: '100%',
             height: '100%',
             display: 'flex',
-            backgroundColor: '#f0f0f0',
-            color: '#000',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#1E1E1E',
+            color: '#FFFFFF',
           }}
         >
-          {image && (
-            <img
-              src={image}
-              alt="Anime"
-              style={{ width: '50%', height: '100%', objectFit: 'cover' }}
-            />
-          )}
-          <div style={{ padding: '20px', fontSize: '32px', display: 'flex', alignItems: 'center' }}>
-            {description || 'Guess the Anime!'}
+          <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#4CAF50', marginBottom: '20px' }}>
+            Anime Guessing Game
+          </div>
+          <div style={{ fontSize: '32px', textAlign: 'center', maxWidth: '80%', wordWrap: 'break-word' }}>
+            {imageUrl ? (
+              <img src={imageUrl} alt="Anime Image" style={{ width: '200px', height: 'auto' }} />
+            ) : message ? message : 'Welcome to the Anime Guessing Game!'}
           </div>
         </div>
       ),
@@ -39,10 +40,34 @@ export default function handler(req) {
       }
     );
   } catch (error) {
-    console.error('Error generating OG image:', error);
-    return new ImageResponse(<div>Error generating the image</div>, {
-      width: 1200,
-      height: 630,
-    });
+    console.error('Error generating image:', error);
+    
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#1E1E1E',
+            color: '#FFFFFF',
+          }}
+        >
+          <div style={{ fontSize: '48px', fontWeight: 'bold', color: '#FF0000', marginBottom: '20px' }}>
+            Error
+          </div>
+          <div style={{ fontSize: '32px', textAlign: 'center', maxWidth: '80%', wordWrap: 'break-word' }}>
+            An error occurred while generating the image. Please try again.
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   }
 }
