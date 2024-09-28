@@ -16,7 +16,7 @@ export default function handler(req) {
       (
         <div
           style={{
-            display: 'flex',
+            display: 'flex', // Add display: flex to handle multiple child nodes properly
             flexDirection: 'row',
             backgroundColor: '#1E1E1E',
             color: '#FFFFFF',
