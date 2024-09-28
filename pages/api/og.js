@@ -1,62 +1,58 @@
-export default async function handler(req, res) {
-  const { title, synopsis, image } = req.query;
+import { ImageResponse } from '@vercel/og';
 
-  const message = synopsis
-    ? synopsis.replace(new RegExp(title, 'gi'), '[REDACTED]')
-    : '[REDACTED] Synopsis not available';
+export const config = {
+  runtime: 'edge',
+};
 
-  const imageUrl = image || 'default-image-url'; // Placeholder for anime without images
+export default function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const title = searchParams.get('title');
+  const synopsis = searchParams.get('synopsis');
+  const image = searchParams.get('image');
+  const message = searchParams.get('message');
 
   try {
-    const html = `
-    <html>
-      <head>
-        <style>
-          body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #fff;
-          }
-          .container {
-            max-width: 800px;
-            padding: 20px;
-            background-color: #1e1e1e;
-            border-radius: 10px;
-          }
-          h1 {
-            font-size: 40px;
-            margin: 0;
-          }
-          p {
-            font-size: 18px;
-            color: #ccc;
-          }
-          .image {
-            max-width: 150px;
-            max-height: 150px;
-            object-fit: cover;
-            border-radius: 5px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>${message}</h1>
-          <p>${message}</p>
-          <img class="image" src="${imageUrl}" alt="anime image" />
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: '#1E1E1E',
+            color: '#FFFFFF',
+            width: '100%',
+            height: '100%',
+            padding: '20px',
+          }}
+        >
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>{title || message || 'Anime Game'}</h1>
+            <p style={{ fontSize: '24px' }}>{synopsis || 'Guess the anime title from the description'}</p>
+          </div>
+          {image && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '300px' }}>
+              <img src={image} alt="Anime" style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }} />
+            </div>
+          )}
         </div>
-      </body>
-    </html>`;
-    
-    res.setHeader('Content-Type', 'text/html');
-    res.status(200).send(html);
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   } catch (error) {
-    console.error('Error generating OG image:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('Error generating image:', error);
+    return new ImageResponse(
+      (
+        <div style={{ display: 'flex', backgroundColor: '#FF0000', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <h1>Error Generating Image</h1>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   }
 }
