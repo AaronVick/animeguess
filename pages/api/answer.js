@@ -16,13 +16,13 @@ export default async function handler(req, res) {
   try {
     let html;
     if (buttonIndex !== undefined) {
-      // This is the answer to a question
+      // The player answered a question
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === 1;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const message = isCorrect 
-        ? `Correct! The anime was ${correctTitle}. You've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered}.` 
-        : `Wrong. The correct anime was ${correctTitle}. You've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered}.`;
+        ? `Correct! The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered}.`
+        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered}.`;
 
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
@@ -33,17 +33,17 @@ export default async function handler(req, res) {
   <head>
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent(message)}" />
-    <meta property="fc:frame:button:1" content="Next Anime" />
+    <meta property="fc:frame:button:1" content="Next Question" />
     <meta property="fc:frame:button:2" content="Share" />
     <meta property="fc:frame:button:2:action" content="link" />
     <meta property="fc:frame:button:2:target" content="${shareUrl}" />
-    <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
+    <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
     <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount }))}" />
   </head>
   <body></body>
 </html>`;
     } else {
-      // This is the "Next Anime" button, so we should show a new anime
+      // This is for "Next Question" button - fetch new anime
       const { title, synopsis, image } = await fetchAnimeData();
       
       console.log('Fetched new anime:', { title, synopsis });
