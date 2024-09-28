@@ -1,33 +1,49 @@
-import { fetchAnimeData, fetchRandomAnimeTitles } from './animeService';
+import { fetchCharacterData } from './animeService';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app';
-    const { title, synopsis, image } = await fetchAnimeData();
-    const [wrongAnswer] = await fetchRandomAnimeTitles(1); // Fetch one wrong answer
+    
+    // Fetch the character data
+    const { characterName, description, image } = await fetchCharacterData();
 
-    const answers = [title, wrongAnswer].sort(() => 0.5 - Math.random());
+    console.log('Fetched character data:', { characterName, description, image });
 
+    // Create the game response with the question
     const html = `
       <html>
         <head>
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content="${baseUrl}/api/og?synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
-          <meta property="fc:frame:button:1" content="${answers[0]}" />
-          <meta property="fc:frame:button:2" content="${answers[1]}" />
+          <meta property="fc:frame:image" content="${baseUrl}/api/og?characterName=${encodeURIComponent(characterName)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(image)}" />
+          <meta property="fc:frame:button:1" content="${characterName}" />
+          <meta property="fc:frame:button:2" content="Not ${characterName}" />
           <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
+          <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: characterName, stage: 'question' }))}" />
         </head>
+        <body></body>
+      </html>
+    `;
+
+    // Send the HTML response
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(html);
+  } catch (error) {
+    console.error('Error in start-game handler:', error);
+
+    // Provide error-specific HTML to inform the user
+    const errorHtml = `
+      <html>
+        <head>
+          <meta property="fc:frame" content="vNext" />
+          <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+          <meta property="fc:frame:button:1" content="Try Again" />
+          <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
+        </head>
+        <body></body>
       </html>
     `;
 
     res.setHeader('Content-Type', 'text/html');
-    res.status(200).send(html);
-  } catch (error) {
-    console.error('Error starting game:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).send(errorHtml);
   }
 }
