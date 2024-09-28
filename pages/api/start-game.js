@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       <html>
         <head>
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content="${baseUrl}/api/og?title=${encodeURIComponent(title)}&synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
+          <meta property="fc:frame:image" content="${baseUrl}/api/og?synopsis=${encodeURIComponent(synopsis)}&image=${encodeURIComponent(image || '')}" />
           <meta property="fc:frame:button:1" content="${answers[0]}" />
           <meta property="fc:frame:button:2" content="${answers[1]}" />
           <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
