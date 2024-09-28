@@ -9,14 +9,14 @@ export default async function handler(req, res) {
   const { untrustedData } = req.body;
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
-  const { correctTitle, correctIndex, totalAnswered = 0, correctCount = 0 } = state;
+  const { correctTitle, correctIndex, totalAnswered = 0, correctCount = 0, stage } = state;
 
   console.log('Received data:', { buttonIndex, state });
 
   try {
     let html;
-    if (buttonIndex !== undefined) {
-      // Compare buttonIndex to see if the answer was correct
+    if (stage === 'question' && buttonIndex !== undefined) {
+      // This is the answer to a question
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
@@ -38,12 +38,12 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:2:action" content="link" />
     <meta property="fc:frame:button:2:target" content="${shareUrl}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
-    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount }))}" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ totalAnswered: newTotalAnswered, correctCount: newCorrectCount, stage: 'answer' }))}" />
   </head>
   <body></body>
 </html>`;
     } else {
-      // This is the "Next Question" button, show a new anime
+      // This is the "Next Question" button or initial state, so we should show a new question
       const { title, synopsis, image } = await fetchAnimeData();
       const [wrongAnswer] = await fetchRandomAnimeTitles(1);
       
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:1" content="${answers[0]}" />
     <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
-    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, correctIndex, totalAnswered, correctCount }))}" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: title, correctIndex, totalAnswered, correctCount, stage: 'question' }))}" />
   </head>
   <body></body>
 </html>`;
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     <meta property="fc:frame" content="vNext" />
     <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
     <meta property="fc:frame:button:1" content="Try Again" />
-    <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
+    <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
   </head>
   <body></body>
 </html>`;
