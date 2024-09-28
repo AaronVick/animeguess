@@ -2,14 +2,14 @@
     "name": "guess-the-anime",
     "version": "1.0.0",
     "scripts": {
-      "build": "next build",
-      "start": "next start",
-      "dev": "next dev"
+        "build": "next build",
+        "start": "next start",
+        "dev": "next dev"
     },
     "dependencies": {
-      "next": "latest",
-      "react": "latest",
-      "react-dom": "latest"
+        "axios": "^0.21.4",
+        "next": "latest",
+        "react": "latest",
+        "react-dom": "latest"
     }
-  }
-  
+}
