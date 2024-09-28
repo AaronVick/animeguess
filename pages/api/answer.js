@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     let html;
-    if (buttonIndex) {
+    if (buttonIndex !== undefined) {
       // This is the answer to a question
       const newTotalAnswered = totalAnswered + 1;
       const isCorrect = buttonIndex === 1;
