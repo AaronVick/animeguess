@@ -47,10 +47,10 @@ export default async function handler(req, res) {
       const { characterName, description, image } = await fetchCharacterData();
       const [wrongAnswer] = await fetchRandomCharacterNames(1);
       
-      const answers = [characterName, wrongAnswer].sort(() => 0.5 - Math.random());
-      const correctIndex = answers.indexOf(characterName);
+      const answers = [characterName, wrongAnswer].sort(() => Math.random() - 0.5);
+      const newCorrectIndex = answers.indexOf(characterName);
 
-      console.log('Fetched new character:', { characterName, description, answers, correctIndex });
+      console.log('Fetched new character:', { characterName, description, answers, newCorrectIndex });
 
       html = `
 <!DOCTYPE html>
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:1" content="${answers[0]}" />
     <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
-    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: characterName, correctIndex, totalAnswered, correctCount, stage: 'question' }))}" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: characterName, correctIndex: newCorrectIndex, totalAnswered, correctCount, stage: 'question' }))}" />
   </head>
   <body></body>
 </html>`;

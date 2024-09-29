@@ -6,7 +6,6 @@ export const config = {
 
 export default function handler(req) {
   const { searchParams } = new URL(req.url);
-  const characterName = searchParams.get('characterName');
   const description = searchParams.get('description');
   const image = searchParams.get('image');
   const message = searchParams.get('message');
@@ -28,8 +27,8 @@ export default function handler(req) {
           }}
         >
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>{characterName || message || 'Anime Character Guess Game'}</h1>
-            <p style={{ fontSize: '24px' }}>{description || 'Guess the anime character based on the description'}</p>
+            <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Guess the Anime Character</h1>
+            <p style={{ fontSize: '34px' }}>{description || message || 'Guess the anime character based on the description'}</p>
           </div>
           {image && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '300px' }}>
