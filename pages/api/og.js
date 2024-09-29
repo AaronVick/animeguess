@@ -23,7 +23,7 @@ export default function handler(req) {
             color: '#FFFFFF',
             width: '100%',
             height: '100%',
-            padding: '20px',
+            padding: '10px',
           }}
         >
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

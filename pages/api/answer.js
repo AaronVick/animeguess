@@ -24,6 +24,8 @@ export default async function handler(req, res) {
         ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
         : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
+      console.log('Answer check:', { buttonIndex, correctIndex, isCorrect });
+
       const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime characters correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
@@ -48,9 +50,9 @@ export default async function handler(req, res) {
       const [wrongAnswer] = await fetchRandomCharacterNames(1);
       
       const answers = [characterName, wrongAnswer].sort(() => Math.random() - 0.5);
-      const newCorrectIndex = answers.indexOf(characterName);
+      const newCorrectIndex = answers.indexOf(characterName) + 1; // Add 1 to make it 1-based
 
-      console.log('Fetched new character:', { characterName, description, answers, newCorrectIndex });
+      console.log('New question:', { characterName, answers, newCorrectIndex });
 
       html = `
 <!DOCTYPE html>
