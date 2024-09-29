@@ -28,7 +28,7 @@ export default function handler(req) {
         >
           <div style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingRight: '20px' }}>
             <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Guess the Anime Character</h1>
-            <p style={{ fontSize: '24px', lineHeight: '1.4' }}>{description || message || 'Guess the anime character based on the description'}</p>
+            <p style={{ fontSize: message ? '34px' : '24px', lineHeight: '1.4' }}>{description || message || 'Guess the anime character based on the description'}</p>
           </div>
           {image && (
             <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
