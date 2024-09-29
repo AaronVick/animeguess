@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
         : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
+      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime characters correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
       html = `
@@ -45,10 +45,12 @@ export default async function handler(req, res) {
     } else {
       // This is the "Next Question" button or initial state, so we should show a new question
       const { characterName, description, image } = await fetchCharacterData();
-      const [wrongCharacterName] = await fetchRandomCharacterNames(1);
-
-      const answers = [characterName, wrongCharacterName].sort(() => 0.5 - Math.random());
+      const [wrongAnswer] = await fetchRandomCharacterNames(1);
+      
+      const answers = [characterName, wrongAnswer].sort(() => 0.5 - Math.random());
       const correctIndex = answers.indexOf(characterName);
+
+      console.log('Fetched new character:', { characterName, description, answers, correctIndex });
 
       html = `
 <!DOCTYPE html>
@@ -65,6 +67,7 @@ export default async function handler(req, res) {
 </html>`;
     }
 
+    console.log('Sending game HTML response:', html);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
@@ -82,6 +85,7 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
 
+    console.log('Sending error HTML response:', errorHtml);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(errorHtml);
   }

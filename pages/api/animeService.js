@@ -8,8 +8,10 @@ export async function fetchCharacterData() {
     const character = response.data.data;
 
     const characterName = character.name;
-    const description = character.about;
-    const image = character.images.jpg.image_url;
+    const description = character.about || 'No description available.';
+    const image = character.images?.jpg?.image_url;
+
+    console.log('Fetched character data:', { characterName, description, image });
 
     return { characterName, description, image };
   } catch (error) {
