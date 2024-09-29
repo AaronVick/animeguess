@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
     console.log('Fetched character data:', { characterName, description, image });
 
-    // Create the game response with the question
+    // Create the game response with the question (including description)
     const html = `
       <html>
         <head>
