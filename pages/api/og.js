@@ -23,19 +23,19 @@ export default function handler(req) {
             color: '#FFFFFF',
             width: '100%',
             height: '100%',
-            padding: '10px',
+            padding: '20px',
           }}
         >
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ flex: '1', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingRight: '20px' }}>
             <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Guess the Anime Character</h1>
-            <p style={{ fontSize: '34px' }}>{description || message || 'Guess the anime character based on the description'}</p>
+            <p style={{ fontSize: '24px', lineHeight: '1.4' }}>{description || message || 'Guess the anime character based on the description'}</p>
           </div>
           {image && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '300px' }}>
+            <div style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <img 
                 src={image} 
                 alt="Character" 
-                style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                 onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
               />
             </div>
