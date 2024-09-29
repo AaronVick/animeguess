@@ -1,4 +1,4 @@
-import { fetchCharacterData, fetchRandomAnimeTitles } from './animeService';
+import { fetchCharacterData, fetchRandomCharacterNames } from './animeService';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const { untrustedData } = req.body;
   const buttonIndex = untrustedData?.buttonIndex;
   const state = JSON.parse(decodeURIComponent(untrustedData?.state || '{}'));
-  const { correctCharacter, correctIndex, totalAnswered = 0, correctCount = 0, stage } = state;
+  const { correctTitle, correctIndex, totalAnswered = 0, correctCount = 0, stage } = state;
 
   console.log('Received data:', { buttonIndex, state });
 
@@ -21,10 +21,10 @@ export default async function handler(req, res) {
       const isCorrect = buttonIndex === correctIndex;
       const newCorrectCount = correctCount + (isCorrect ? 1 : 0);
       const message = isCorrect 
-        ? `Correct! The answer was ${correctCharacter}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
-        : `Wrong. The correct answer was ${correctCharacter}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
+        ? `Correct! The answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`
+        : `Wrong. The correct answer was ${correctTitle}. You've guessed ${newCorrectCount} out of ${newTotalAnswered} correctly.`;
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime characters correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
+      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime titles correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
       html = `
@@ -43,14 +43,12 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
     } else {
-      // This is the "Next Question" button or initial state, so we should show a new character
+      // This is the "Next Question" button or initial state, so we should show a new question
       const { characterName, description, image } = await fetchCharacterData();
-      const [wrongAnswer] = await fetchRandomAnimeTitles(1); // Get a wrong answer (random title)
+      const [wrongCharacterName] = await fetchRandomCharacterNames(1);
 
-      const answers = [characterName, wrongAnswer].sort(() => 0.5 - Math.random()); // Shuffle the answers
+      const answers = [characterName, wrongCharacterName].sort(() => 0.5 - Math.random());
       const correctIndex = answers.indexOf(characterName);
-
-      console.log('Fetched new character:', { characterName, description, answers, correctIndex });
 
       html = `
 <!DOCTYPE html>
@@ -61,13 +59,12 @@ export default async function handler(req, res) {
     <meta property="fc:frame:button:1" content="${answers[0]}" />
     <meta property="fc:frame:button:2" content="${answers[1]}" />
     <meta property="fc:frame:post_url" content="${baseUrl}/api/answer" />
-    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctCharacter: characterName, correctIndex, totalAnswered, correctCount, stage: 'question' }))}" />
+    <meta property="fc:frame:state" content="${encodeURIComponent(JSON.stringify({ correctTitle: characterName, correctIndex, totalAnswered, correctCount, stage: 'question' }))}" />
   </head>
   <body></body>
 </html>`;
     }
 
-    console.log('Sending game HTML response:', html);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(html);
   } catch (error) {
@@ -85,7 +82,6 @@ export default async function handler(req, res) {
   <body></body>
 </html>`;
 
-    console.log('Sending error HTML response:', errorHtml);
     res.setHeader('Content-Type', 'text/html');
     res.status(200).send(errorHtml);
   }
