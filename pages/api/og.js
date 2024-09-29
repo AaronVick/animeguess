@@ -1,55 +1,65 @@
-export default async function handler(req, res) {
-  const { characterName, description, image } = req.query;
+import { ImageResponse } from '@vercel/og';
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const characterName = searchParams.get('characterName');
+  const description = searchParams.get('description');
+  const image = searchParams.get('image');
+  const message = searchParams.get('message');
+
+  const placeholderImage = 'https://via.placeholder.com/400x600?text=No+Image+Available';
 
   try {
-    // HTML response to create the OG image for Vercel
-    const html = `
-      <html>
-        <head>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              display: flex;
-              justify-content: space-between;
-              background-color: #1c1c1e;
-              color: white;
-              padding: 20px;
-            }
-            .info {
-              width: 50%; /* Reduce width to allow more room for the image */
-            }
-            .image {
-              width: 50%; /* Increase the width to make the image take more space */
-              display: flex;
-              align-items: center;
-              justify-content: center; /* Center the image */
-            }
-            img {
-              max-width: 90%; /* Make the image take up more space but leave some padding */
-              max-height: 90vh; /* Ensure the image doesn’t overflow the screen vertically */
-              border-radius: 8px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="info">
-            <h1>${characterName}</h1>
-            <p>${description}</p>
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            backgroundColor: '#1E1E1E',
+            color: '#FFFFFF',
+            width: '100%',
+            height: '100%',
+            padding: '20px',
+          }}
+        >
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>{characterName || message || 'Anime Character Guess Game'}</h1>
+            <p style={{ fontSize: '24px' }}>{description || 'Guess the anime character based on the description'}</p>
           </div>
-          <div class="image">
-            <img src="${image}" alt="Character image" />
-          </div>
-        </body>
-      </html>
-    `;
-
-    // Set the appropriate headers
-    res.setHeader('Content-Type', 'text/html');
-    // Send the HTML response to generate the Open Graph image
-    res.status(200).send(html);
+          {image && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '300px' }}>
+              <img 
+                src={image} 
+                alt="Character" 
+                style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
+                onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+              />
+            </div>
+          )}
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   } catch (error) {
-    // Handle any errors
-    console.error('Error generating OG image:', error);
-    res.status(500).send('Error generating OG image');
+    console.error('Error generating image:', error);
+    return new ImageResponse(
+      (
+        <div style={{ display: 'flex', backgroundColor: '#FF0000', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          <h1>Error Generating Image</h1>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+      }
+    );
   }
 }
