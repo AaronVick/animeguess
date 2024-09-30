@@ -8,7 +8,8 @@ function cleanDescription(description) {
   const unwantedPatterns = [
     /No voice actors.*?database by searching.*?\./gi,  // Matches 'No voice actors' and 'Help improve'
     /Help improve our database.*?\./gi,  // Matches 'Help improve our database'
-    /No description available\./gi       // Matches 'No description available'
+    /No description available\./gi,       // Matches 'No description available'
+    /^Appears in episode.*?\./gi          // Matches descriptions starting with 'Appears in episode'
   ];
 
   let cleanedDescription = description;
@@ -43,9 +44,9 @@ async function fetchValidCharacterData(maxRetries = 10) {
       let description = character.about;
       const image = character.images?.jpg?.image_url;
 
-      if (description && 
-          description.trim() !== '' && 
-          description !== 'No description available.' &&
+      // Ensure the description exists, is clean, and does not start with 'Appears in episode'
+      if (description && description.trim() !== '' && description !== 'No description available.' &&
+          !description.toLowerCase().startsWith('appears in episode') && 
           !isNameInDescription(characterName, description)) {
         
         // Clean up the description by removing unnecessary text
@@ -71,11 +72,7 @@ async function fetchValidCharacterData(maxRetries = 10) {
   throw new Error('Failed to fetch a character with a valid description');
 }
 
-export async function fetchCharacterData() {
-  return await fetchValidCharacterData();
-}
-
-// A more extensive fallback character list
+// Fallback characters for wrong answers
 const fallbackCharacters = [
   "Naruto Uzumaki", "Monkey D. Luffy", "Goku", "Light Yagami", "Lelouch Lamperouge",
   "Eren Yeager", "Levi Ackerman", "Mikasa Ackerman", "Edward Elric", "Spike Spiegel",
@@ -111,4 +108,8 @@ export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
     const filteredFallbacks = fallbackCharacters.filter(name => name !== excludeName);
     return filteredFallbacks.sort(() => 0.5 - Math.random()).slice(0, count);
   }
+}
+
+export async function fetchCharacterData() {
+  return await fetchValidCharacterData();
 }
