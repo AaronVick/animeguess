@@ -15,13 +15,19 @@ async function fetchValidCharacterData(maxRetries = 10) {
       const character = response.data.data;
 
       const characterName = character.name;
-      const description = character.about;
+      let description = character.about;
       const image = character.images?.jpg?.image_url;
 
       if (description && 
           description.trim() !== '' && 
           description !== 'No description available.' &&
           !isNameInDescription(characterName, description)) {
+        
+        // Limit description length to approximately 3 lines (assuming 50 characters per line)
+        if (description.length > 150) {
+          description = description.substring(0, 147) + '...';
+        }
+
         console.log('Fetched valid character data:', { characterName, description: description.substring(0, 50) + '...', image });
         return { characterName, description, image };
       }
@@ -38,11 +44,19 @@ export async function fetchCharacterData() {
   return await fetchValidCharacterData();
 }
 
-export async function fetchRandomCharacterNames(count = 1) {
+export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
   try {
-    const response = await axios.get(`${BASE_URL}/top/characters`);
-    const topCharacters = response.data.data.slice(0, count);
-    return topCharacters.map((character) => character.name);
+    const response = await axios.get(`${BASE_URL}/characters?order_by=favorites&sort=desc&limit=100`);
+    const characters = response.data.data;
+    const filteredCharacters = characters.filter(char => char.name !== excludeName);
+    
+    // Shuffle the array
+    for (let i = filteredCharacters.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filteredCharacters[i], filteredCharacters[j]] = [filteredCharacters[j], filteredCharacters[i]];
+    }
+    
+    return filteredCharacters.slice(0, count).map(character => character.name);
   } catch (error) {
     console.error('Error fetching random character names:', error);
     throw new Error('Failed to fetch random character names');
