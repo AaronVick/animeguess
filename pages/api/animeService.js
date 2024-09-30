@@ -2,6 +2,23 @@ import axios from 'axios';
 
 const BASE_URL = 'https://api.jikan.moe/v4';
 
+// Function to clean up unnecessary parts of the description
+function cleanDescription(description) {
+  // Define patterns to remove
+  const unwantedPatterns = [
+    /No voice actors.*?database by searching.*?\./gi,  // Matches 'No voice actors' and 'Help improve'
+    /Help improve our database.*?\./gi,  // Matches 'Help improve our database'
+    /No description available\./gi       // Matches 'No description available'
+  ];
+
+  let cleanedDescription = description;
+  unwantedPatterns.forEach((pattern) => {
+    cleanedDescription = cleanedDescription.replace(pattern, '');
+  });
+
+  return cleanedDescription.trim();
+}
+
 // Check if the character's name is in the description
 function isNameInDescription(name, description) {
   const nameParts = name.toLowerCase().split(' ');
@@ -31,6 +48,9 @@ async function fetchValidCharacterData(maxRetries = 10) {
           description !== 'No description available.' &&
           !isNameInDescription(characterName, description)) {
         
+        // Clean up the description by removing unnecessary text
+        description = cleanDescription(description);
+
         // Remove the character's name from the description
         description = removeCharacterName(description, characterName);
 
