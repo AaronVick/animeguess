@@ -1,20 +1,24 @@
 import { fetchCharacterData, fetchRandomCharacterNames } from './animeService';
 
 export default async function handler(req, res) {
+  console.log(`Received ${req.method} request to /api/start-game`);
+
   if (req.method !== 'GET' && req.method !== 'POST') {
+    console.log(`Method ${req.method} not allowed`);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app';
-    
+    console.log(`Base URL: ${baseUrl}`);
+
     // Fetch the character data
     const { characterName, description, image } = await fetchCharacterData();
     
     // Fetch a random character name for the wrong answer, excluding the correct answer
     const [wrongCharacterName] = await fetchRandomCharacterNames(1, characterName);
 
-    console.log('Fetched character data:', { characterName, description, image });
+    console.log('Fetched character data:', { characterName, description: description.substring(0, 50) + '...', image });
 
     // Randomly assign correct answer to button 1 or 2
     const correctButtonIndex = Math.random() < 0.5 ? 1 : 2;
@@ -53,9 +57,9 @@ export default async function handler(req, res) {
       <html>
         <head>
           <meta property="fc:frame" content="vNext" />
-          <meta property="fc:frame:image" content="${baseUrl}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
+          <meta property="fc:frame:image" content="${process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app'}/api/og?message=${encodeURIComponent('An error occurred. Please try again.')}" />
           <meta property="fc:frame:button:1" content="Try Again" />
-          <meta property="fc:frame:post_url" content="${baseUrl}/api/start-game" />
+          <meta property="fc:frame:post_url" content="${process.env.NEXT_PUBLIC_BASE_URL || 'https://animeguess.vercel.app'}/api/start-game" />
         </head>
         <body></body>
       </html>
