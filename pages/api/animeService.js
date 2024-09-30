@@ -33,7 +33,51 @@ function removeCharacterName(description, name) {
   return description.replace(regex, 'this character');
 }
 
-// Fetch valid character data
+// Fallback characters for wrong answers and last-resort character
+const fallbackCharacters = [
+  "Naruto Uzumaki", "Monkey D. Luffy", "Goku", "Light Yagami", "Lelouch Lamperouge",
+  "Eren Yeager", "Levi Ackerman", "Mikasa Ackerman", "Edward Elric", "Spike Spiegel",
+  "Gintoki Sakata", "Saitama", "Killua Zoldyck", "L Lawliet", "Vegeta",
+  "Itachi Uchiha", "Kakashi Hatake", "Sakura Haruno", "Sailor Moon", "Gon Freecss",
+  "Ichigo Kurosaki", "Natsu Dragneel", "Yusuke Urameshi", "Kirito", "Asuna Yuuki",
+  "Shinichi Kudo", "Ran Mouri", "Roronoa Zoro", "Sanji", "Bulma"
+];
+
+const fallbackCharacterData = {
+  characterName: 'Saitama',
+  description: 'Saitama is the strongest hero in the world, but he struggles with boredom as he can defeat any opponent with a single punch.',
+  image: 'https://cdn.myanimelist.net/images/characters/14/311621.jpg'
+};
+
+// Fetch random character names for wrong answers
+export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
+  try {
+    const response = await axios.get(`${BASE_URL}/top/characters`, {
+      params: {
+        limit: 100
+      }
+    });
+    const characters = response.data.data;
+    const filteredCharacters = characters.filter(char => char.name !== excludeName);
+    
+    // Shuffle the array
+    for (let i = filteredCharacters.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filteredCharacters[i], filteredCharacters[j]] = [filteredCharacters[j], filteredCharacters[i]];
+    }
+    
+    return filteredCharacters.slice(0, count).map(character => character.name);
+  } catch (error) {
+    console.error('Error fetching random character names:', error);
+    console.log('Using fallback character names');
+    
+    // Use fallback characters if API fails
+    const filteredFallbacks = fallbackCharacters.filter(name => name !== excludeName);
+    return filteredFallbacks.sort(() => 0.5 - Math.random()).slice(0, count);
+  }
+}
+
+// Fetch valid character data with improved retries and fallback
 async function fetchValidCharacterData(maxRetries = 10) {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -66,48 +110,12 @@ async function fetchValidCharacterData(maxRetries = 10) {
       console.log('Skipping character due to invalid description or name in description, retrying...');
     } catch (error) {
       console.error('Error fetching character data:', error);
-      if (i === maxRetries - 1) throw new Error('Failed to fetch character data after multiple attempts');
     }
   }
-  throw new Error('Failed to fetch a character with a valid description');
-}
-
-// Fallback characters for wrong answers
-const fallbackCharacters = [
-  "Naruto Uzumaki", "Monkey D. Luffy", "Goku", "Light Yagami", "Lelouch Lamperouge",
-  "Eren Yeager", "Levi Ackerman", "Mikasa Ackerman", "Edward Elric", "Spike Spiegel",
-  "Gintoki Sakata", "Saitama", "Killua Zoldyck", "L Lawliet", "Vegeta",
-  "Itachi Uchiha", "Kakashi Hatake", "Sakura Haruno", "Sailor Moon", "Gon Freecss",
-  "Ichigo Kurosaki", "Natsu Dragneel", "Yusuke Urameshi", "Kirito", "Asuna Yuuki",
-  "Shinichi Kudo", "Ran Mouri", "Roronoa Zoro", "Sanji", "Bulma"
-];
-
-// Fetch random character names for wrong answers
-export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
-  try {
-    const response = await axios.get(`${BASE_URL}/top/characters`, {
-      params: {
-        limit: 100
-      }
-    });
-    const characters = response.data.data;
-    const filteredCharacters = characters.filter(char => char.name !== excludeName);
-    
-    // Shuffle the array
-    for (let i = filteredCharacters.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [filteredCharacters[i], filteredCharacters[j]] = [filteredCharacters[j], filteredCharacters[i]];
-    }
-    
-    return filteredCharacters.slice(0, count).map(character => character.name);
-  } catch (error) {
-    console.error('Error fetching random character names:', error);
-    console.log('Using fallback character names');
-    
-    // Use fallback characters if API fails
-    const filteredFallbacks = fallbackCharacters.filter(name => name !== excludeName);
-    return filteredFallbacks.sort(() => 0.5 - Math.random()).slice(0, count);
-  }
+  
+  // Fallback to predefined character if all retries fail
+  console.warn('Using fallback character due to multiple failures');
+  return fallbackCharacterData;
 }
 
 export async function fetchCharacterData() {
