@@ -44,9 +44,20 @@ export async function fetchCharacterData() {
   return await fetchValidCharacterData();
 }
 
+const fallbackCharacters = [
+  "Naruto Uzumaki", "Monkey D. Luffy", "Goku", "Light Yagami", "Lelouch Lamperouge",
+  "Eren Yeager", "Levi Ackerman", "Mikasa Ackerman", "Edward Elric", "Spike Spiegel",
+  "Gintoki Sakata", "Saitama", "Killua Zoldyck", "L Lawliet", "Vegeta",
+  "Itachi Uchiha", "Kakashi Hatake", "Sakura Haruno", "Sailor Moon", "Gon Freecss"
+];
+
 export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
   try {
-    const response = await axios.get(`${BASE_URL}/characters?order_by=favorites&sort=desc&limit=100`);
+    const response = await axios.get(`${BASE_URL}/top/characters`, {
+      params: {
+        limit: 100
+      }
+    });
     const characters = response.data.data;
     const filteredCharacters = characters.filter(char => char.name !== excludeName);
     
@@ -59,6 +70,10 @@ export async function fetchRandomCharacterNames(count = 1, excludeName = '') {
     return filteredCharacters.slice(0, count).map(character => character.name);
   } catch (error) {
     console.error('Error fetching random character names:', error);
-    throw new Error('Failed to fetch random character names');
+    console.log('Using fallback character names');
+    
+    // Use fallback characters if API fails
+    const filteredFallbacks = fallbackCharacters.filter(name => name !== excludeName);
+    return filteredFallbacks.sort(() => 0.5 - Math.random()).slice(0, count);
   }
 }

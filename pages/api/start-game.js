@@ -13,12 +13,18 @@ export default async function handler(req, res) {
     console.log(`Base URL: ${baseUrl}`);
 
     // Fetch the character data
-    const { characterName, description, image } = await fetchCharacterData();
-    
-    // Fetch a random character name for the wrong answer, excluding the correct answer
-    const [wrongCharacterName] = await fetchRandomCharacterNames(1, characterName);
+    let characterData, wrongCharacterName;
+    try {
+      characterData = await fetchCharacterData();
+      [wrongCharacterName] = await fetchRandomCharacterNames(1, characterData.characterName);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw new Error('Failed to fetch necessary data for the game');
+    }
 
-    console.log('Fetched character data:', { characterName, description: description.substring(0, 50) + '...', image });
+    const { characterName, description, image } = characterData;
+
+    console.log('Game data:', { characterName, description: description.substring(0, 50) + '...', image, wrongCharacterName });
 
     // Randomly assign correct answer to button 1 or 2
     const correctButtonIndex = Math.random() < 0.5 ? 1 : 2;
