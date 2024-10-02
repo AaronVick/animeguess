@@ -26,6 +26,12 @@ function isNameInDescription(name, description) {
   return nameParts.some(part => descriptionLower.includes(part));
 }
 
+// Remove the character's name from the description, replacing it with "this character"
+function removeCharacterName(description, name) {
+  const regex = new RegExp(name, 'gi');
+  return description.replace(regex, 'this character');
+}
+
 // Fallback incorrect character names (used only for incorrect answers)
 const fallbackIncorrectNames = [
   "Naruto Uzumaki", "Monkey D. Luffy", "Goku", "Light Yagami", "Lelouch Lamperouge",
