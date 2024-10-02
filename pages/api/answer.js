@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
       console.log('Answer check:', { buttonIndex, correctIndex, isCorrect });
 
-      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime characters correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nPlay now:`);
+      const shareText = encodeURIComponent(`I've guessed ${newCorrectCount} anime characters correctly out of ${newTotalAnswered} questions! Can you beat my score?\n\nFrame by @aaronv.eth`);
       const shareUrl = `https://warpcast.com/~/compose?text=${shareText}&embeds[]=${encodeURIComponent(baseUrl)}`;
 
       html = `
